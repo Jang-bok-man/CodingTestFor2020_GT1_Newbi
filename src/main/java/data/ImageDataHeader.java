@@ -4,7 +4,6 @@ package data;
  * Created by user on 2020-11-02.
  */
 public class ImageDataHeader {
-
   private final int sequenceNumber;
   private final int dataLength;
 
