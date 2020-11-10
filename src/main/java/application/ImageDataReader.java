@@ -55,7 +55,7 @@ public class ImageDataReader {
         byte []fByte = new byte[4];
         System.out.println("FileName :" + file.getName() + " DataLen :" + dataLength + " ImageDataLen :" + (dataLength/4));
 
-        for(int Offset = 0, Idx = 12; Idx < ((fmtHeader.length - 12) / 4); Offset++, Idx += 4) {
+        for(int Offset = 0, Idx = 12; Idx < (dataLength + 12); Offset++, Idx += 4) {
           imageData[Offset] = 0;
 
           fByte[0] = (byte)0x00;
