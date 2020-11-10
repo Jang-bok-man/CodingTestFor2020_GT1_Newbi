@@ -14,45 +14,40 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  * Created by user on 2020-11-02.
  */
 public class ImageDataReader {
-  public static int byteToint(byte[] arr) {
-    return (arr[3] & 0xff) << 24 | (arr[2] & 0xff) << 16 | (arr[1] & 0xff) << 8 | (arr[0] & 0xff);
-  }
 
   public static ImageData readImageDataFile(String filePath) throws IOException {
     //implement code
 
     ImageData     id = new ImageData();
-    ImageData     tempId;
+    ImageData     tempId = null;
     File          dir = new File(filePath);
     File          []fileList = dir.listFiles();
-    int           count = 0, sync = 0, sequenceNumber = 0, dataLength = 0, offset = 0;
-    long          filesize = 0;
+    int           sync = 0, sequenceNumber = 0, dataLength = 0;
     String        FullFilePath;
 
     for(int i = 0; i < fileList.length; i++) {
       File		file = fileList[i];
 
       if(file.isFile()) {
-        filesize = file.length();
-
-        if(filesize < 12) continue;
+        if(file.length() < 12) continue;
         FullFilePath          = filePath + "/" + file.getName();
         DataInputStream in    = new DataInputStream(new FileInputStream(FullFilePath));
-        byte      []fmtHeader = new byte[(int)filesize];
+        byte      []fmtHeader = new byte[(int)file.length()];
 
-        while(in.read(fmtHeader) > 0) {
-          ;
+        while(true) {
+          if(in.read(fmtHeader) <= 0) break;
         }
-        sync = byteToint(fmtHeader);
+
+        sync = (((fmtHeader[3] & 0xff) << 24) | ((fmtHeader[2] & 0xff) << 16) | ((fmtHeader[1] & 0xff) << 8) | (fmtHeader[0] & 0xff));
         if(id.SYNC != sync) continue;
 
-        sequenceNumber = ((fmtHeader[7] & 0xff) << 24) | ((fmtHeader[6] & 0xff) << 16) | ((fmtHeader[5] & 0xff) << 8) | ((fmtHeader[4] & 0xff));
-        dataLength = ((fmtHeader[11] & 0xff) << 24) | ((fmtHeader[10] & 0xff) << 16) | ((fmtHeader[9] & 0xff) << 8) | ((fmtHeader[8] & 0xff));
+        sequenceNumber  = ((fmtHeader[7] & 0xff) << 24) | ((fmtHeader[6] & 0xff) << 16) | ((fmtHeader[5] & 0xff) << 8) | ((fmtHeader[4] & 0xff));
+        dataLength      = ((fmtHeader[11] & 0xff) << 24) | ((fmtHeader[10] & 0xff) << 16) | ((fmtHeader[9] & 0xff) << 8) | ((fmtHeader[8] & 0xff));
 
-        if(dataLength + 12 != filesize) continue;
+        if(dataLength + 12 != file.length()) continue;
 
         int []imageData = new int[dataLength / 4];
-        byte []fByte = new byte[4];
+        byte []fByte    = new byte[4];
         System.out.println("FileName :" + file.getName() + " DataLen :" + dataLength + " ImageDataLen :" + (dataLength/4));
 
         for(int Offset = 0, Idx = 12; Idx < (dataLength + 12); Offset++, Idx += 4) {
@@ -84,12 +79,11 @@ public class ImageDataReader {
     }
 
     return id;
-    //throw new NotImplementedException();
   }
 
   private static int readDataByLittleEndianToInt(byte[] readData) {
-    final int size = Integer.SIZE / 8;
-    ByteBuffer buff = ByteBuffer.allocate(size);
+    final int size        = Integer.SIZE / 8;
+    ByteBuffer buff       = ByteBuffer.allocate(size);
     final byte[]newBytes  = new byte[size];
 
     for(int i = 0; i < size; i++) {

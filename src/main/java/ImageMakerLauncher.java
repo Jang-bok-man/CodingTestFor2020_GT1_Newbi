@@ -3,13 +3,10 @@
  */
 import data.*;
 import application.*;
-import sun.font.AttributeMap;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,23 +32,20 @@ public class ImageMakerLauncher {
     }
 
     //processing
-    //id.sort();
-    //id.reverse();
     size = id.size();
-
-    Map<Integer, ImageData> testMap = new HashMap<Integer, ImageData>();
+    Map<Integer, ImageData> ImgMap = new HashMap<Integer, ImageData>();
     for(i = 0; i < size; i++) {
       ImgD = id.get(i);
       ImgDHdr = ImgD.getImageDataHeader();
-      testMap.put((ImgDHdr.getSequenceNumber()), id.get(i));
+      ImgMap.put((ImgDHdr.getSequenceNumber()), id.get(i));
     }
 
-    Object[] mapKey = testMap.keySet().toArray();
+    Object[] mapKey = ImgMap.keySet().toArray();
     Arrays.sort(mapKey);
 
-    for(Integer nKey : testMap.keySet()) {
-      ImageData   imgData = testMap.get(nKey);
-      ImgDHdr = imgData.getImageDataHeader();
+    for(Integer nKey : ImgMap.keySet()) {
+      ImgD = ImgMap.get(nKey);
+      ImgDHdr = ImgD.getImageDataHeader();
       if(ImgWidth == 0) {
         ImgWidth = ImgDHdr.getDataLength();
       }
@@ -65,9 +59,8 @@ public class ImageMakerLauncher {
     i = 0;
     BufferedImage   img = new BufferedImage((ImgWidth / 4), ImgHeight, BufferedImage.TYPE_INT_RGB);
     File            ImgFile = new File("result.bmp");
-    for(Integer nKey : testMap.keySet()) {
-      ImgD = testMap.get(nKey);
-      ImgDHdr = ImgD.getImageDataHeader();
+    for(Integer nKey : ImgMap.keySet()) {
+      ImgD = ImgMap.get(nKey);
 
       int[] iData = ImgD.getImageData();
       //System.out.format("IData.Length %d Seq %d Len %d\n", iData.length, ImgDHdr.getSequenceNumber(), ImgDHdr.getDataLength());
@@ -80,13 +73,5 @@ public class ImageMakerLauncher {
     }
     ImageIO.write(img, "bmp", ImgFile);
     //System.out.println("Write Complete!!!!");
-  }
-
-  private static byte[] intToByteArray(final int integer) {
-    ByteBuffer  buff = ByteBuffer.allocate(Integer.SIZE / 8);
-    buff.putInt(integer);
-    buff.order(ByteOrder.LITTLE_ENDIAN);
-
-    return buff.array();
   }
 }
